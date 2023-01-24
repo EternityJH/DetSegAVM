@@ -1,0 +1,5 @@
+train: /work/samhong833/Data_AVM/forYOLOv5_FiveFold/FiveFold/f2/1_tra/images
+val: /work/samhong833/Data_AVM/forYOLOv5_FiveFold/FiveFold/f2/2_val/images
+
+nc: 1
+names: ['avm']
