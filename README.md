@@ -3,7 +3,7 @@ There are Detection and Segmentation for this project.
 
 The YOLOv5 and YOLOv8 are the fork repository.
 
-It is recommanded to use the ananconda and create the virtual environment for each model (YOLOv5, YOLOv8, and Segentation).
+It is recommanded to use the ananconda and create the virtual environment for each model (YOLOv5, YOLOv8, and Segmentation).
 
 ## Detection
 Please refer to the YOLOv5 and YOLOv8 folder for the environment configuration.
