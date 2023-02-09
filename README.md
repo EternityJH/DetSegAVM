@@ -3,7 +3,11 @@ There are Detection and Segmentation for this project.
 The YOLOv5 and YOLOv8 are the fork repository.
 
 ## Detection
+Please refer to the YOLOv5 and YOLOv8 folder for the environment configuration.
 
+For training and inference with YOLOv5, please modify and run the "YOLOv5_bAVM.ipynb." 
+
+For training and inference with YOLOv8, please modify and run the "YOLOv8_bAVM.ipynb." 
 
 ## Segmentation
 If run on the anaconda environment please create a virtual environment.
@@ -15,10 +19,12 @@ The requirements.txt can be found in the Segmentation folder.
 pip install -r requirements.txt  # install
 ```
 
-For training the segmentation model, please run the "AVM_MR_Seg_train.ipynb."
+For training the segmentation model, please modify and run the "AVM_MR_Seg_train.ipynb."
 
-For inference the segmentation model after training, please run the "AVM_MR_Seg_output.ipynb."
+For inference the segmentation model after training, please modify and run the "AVM_MR_Seg_output.ipynb."
 
-For the combination inference for the detection and segmentation, please run the "AVM_MR_Seg_output_yolo.ipynb."
+For the combination inference for the detection and segmentation, please modify and run the "AVM_MR_Seg_output_yolo.ipynb."
 
 The configuration detail can be found inside the jupyter notebook.
+
+The code that need to be modified is noted with "#mod."
