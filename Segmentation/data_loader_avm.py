@@ -75,11 +75,19 @@ class Dataset(Data.Dataset):
 
 
 class Dataset_out(Data.Dataset):
-    def __init__(self, list_, path_lab_txt, dilate_factor):
+    def __init__(self, list_, path_lab_txt,
+                   yolo_inf,
+                   conf_thresh,
+                   dilate,
+                   dilate_factor):
+        
             self.data_len = len(list_)
             self.list_ = list_
             self.path_lab_txt = path_lab_txt
             self.dilate_factor = dilate_factor
+            self.yolo_inf = yolo_inf
+            self.conf_thresh = conf_thresh
+            self.dilate = dilate
             #self.lab = list_lab
             
     def __len__(self):        
@@ -91,24 +99,32 @@ class Dataset_out(Data.Dataset):
     def __getitem__(self, index):
         
         tmp = sio.loadmat(self.list_[index])
-        tmp_str = self.list_[index].split('/')
+        tmp_str = self.list_[index].split('\\')
         tmp_str = tmp_str[-1][0:-4]        
         
         bx = pd.read_csv(
-            self.path_lab_txt+'/'+tmp_str+'.txt', sep=" ",header=None)
+            self.path_lab_txt+'\\'+tmp_str+'.txt', sep=" ",header=None)
+        
+        if self.yolo_inf:
+            bx = bx.loc[bx.loc[:,5]>=self.conf_thresh,:]
 
         # a slice may have multiple bx
         for i in range(bx.shape[0]):
             bx_tmp = np.array(bx.iloc[i,:])
             mask_tmp = gen_bx(tmp['img'].shape,bx_tmp,
-                              dilate=True,dilate_factor=self.dilate_factor)
+                              dilate=self.dilate,
+                              dilate_factor=self.dilate_factor)
             if i == 0:
                 mask_bx = mask_tmp
             else:
-                mask_bx = np.logical_or(mask_bx,mask_tmp)
+                mask_bx = np.logical_or(mask_bx,mask_tmp)   
         
         # assign entry and para
         img = tmp['img']
+        
+        if not 'mask_bx' in locals():
+            mask_bx = np.zeros(img.shape)
+        
         img = np.multiply(img,mask_bx)
         img = img.reshape(img.shape[0],img.shape[1],1)
         img = np.transpose(img,(2,0,1))
