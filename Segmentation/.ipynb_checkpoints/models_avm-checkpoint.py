@@ -8,42 +8,34 @@ import torchvision.transforms as T
 
 
 
-class conv_block(nn.Module):
+class conv_block_nested(nn.Module):
     
     def __init__(self, in_ch, mid_ch, out_ch, norm_method='batch'):
-        super(conv_block, self).__init__()
-
+        super(conv_block_nested, self).__init__()
         self.activation = nn.ReLU(inplace=True)
         self.conv1 = nn.Conv2d(in_ch, mid_ch, kernel_size=3, padding=1, bias=True)
-        self.norm_method = norm_method
         if norm_method=='group':
-            self.gn1 = nn.GroupNorm(8,mid_ch)
+            self.bn1 = nn.GroupNorm(8,mid_ch)
         elif norm_method=='batch':
             self.bn1 = nn.BatchNorm2d(mid_ch)        
         self.conv2 = nn.Conv2d(mid_ch, out_ch, kernel_size=3, padding=1, bias=True)
         if norm_method=='group':
-            self.gn2 = nn.GroupNorm(8,out_ch)
+            self.bn2 = nn.GroupNorm(8,out_ch)
         elif norm_method=='batch':
             self.bn2 = nn.BatchNorm2d(out_ch)        
 
     def forward(self, x):
         x = self.conv1(x)
-        if self.norm_method=='group':
-            x = self.gn1(x)
-        elif self.norm_method=='batch':
-            x = self.bn1(x)
+        x = self.bn1(x)
         x = self.activation(x)
         
         x = self.conv2(x)
-        if self.norm_method=='group':
-            x = self.gn2(x)
-        elif self.norm_method=='batch':
-            x = self.bn2(x)
+        x = self.bn2(x)
         output = self.activation(x)
 
         return output
 
-    
+
 #Nested Unet
 class NestedUNet(nn.Module):
     """
@@ -59,25 +51,25 @@ class NestedUNet(nn.Module):
         self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
         self.Up = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True)
 
-        self.conv0_0 = conv_block(in_ch, filters[0], filters[0], norm_method)
-        self.conv1_0 = conv_block(filters[0], filters[1], filters[1], norm_method)
-        self.conv2_0 = conv_block(filters[1], filters[2], filters[2], norm_method)
-        self.conv3_0 = conv_block(filters[2], filters[3], filters[3], norm_method)
-        self.conv4_0 = conv_block(filters[3], filters[4], filters[4], norm_method)
+        self.conv0_0 = conv_block_nested(in_ch, filters[0], filters[0], norm_method)
+        self.conv1_0 = conv_block_nested(filters[0], filters[1], filters[1], norm_method)
+        self.conv2_0 = conv_block_nested(filters[1], filters[2], filters[2], norm_method)
+        self.conv3_0 = conv_block_nested(filters[2], filters[3], filters[3], norm_method)
+        self.conv4_0 = conv_block_nested(filters[3], filters[4], filters[4], norm_method)
 
-        self.conv0_1 = conv_block(filters[0] + filters[1], filters[0], filters[0], norm_method)
-        self.conv1_1 = conv_block(filters[1] + filters[2], filters[1], filters[1], norm_method)
-        self.conv2_1 = conv_block(filters[2] + filters[3], filters[2], filters[2], norm_method)
-        self.conv3_1 = conv_block(filters[3] + filters[4], filters[3], filters[3], norm_method)
+        self.conv0_1 = conv_block_nested(filters[0] + filters[1], filters[0], filters[0], norm_method)
+        self.conv1_1 = conv_block_nested(filters[1] + filters[2], filters[1], filters[1], norm_method)
+        self.conv2_1 = conv_block_nested(filters[2] + filters[3], filters[2], filters[2], norm_method)
+        self.conv3_1 = conv_block_nested(filters[3] + filters[4], filters[3], filters[3], norm_method)
 
-        self.conv0_2 = conv_block(filters[0]*2 + filters[1], filters[0], filters[0], norm_method)
-        self.conv1_2 = conv_block(filters[1]*2 + filters[2], filters[1], filters[1], norm_method)
-        self.conv2_2 = conv_block(filters[2]*2 + filters[3], filters[2], filters[2], norm_method)
+        self.conv0_2 = conv_block_nested(filters[0]*2 + filters[1], filters[0], filters[0], norm_method)
+        self.conv1_2 = conv_block_nested(filters[1]*2 + filters[2], filters[1], filters[1], norm_method)
+        self.conv2_2 = conv_block_nested(filters[2]*2 + filters[3], filters[2], filters[2], norm_method)
 
-        self.conv0_3 = conv_block(filters[0]*3 + filters[1], filters[0], filters[0], norm_method)
-        self.conv1_3 = conv_block(filters[1]*3 + filters[2], filters[1], filters[1], norm_method)
+        self.conv0_3 = conv_block_nested(filters[0]*3 + filters[1], filters[0], filters[0], norm_method)
+        self.conv1_3 = conv_block_nested(filters[1]*3 + filters[2], filters[1], filters[1], norm_method)
 
-        self.conv0_4 = conv_block(filters[0]*4 + filters[1], filters[0], filters[0], norm_method)
+        self.conv0_4 = conv_block_nested(filters[0]*4 + filters[1], filters[0], filters[0], norm_method)
 
         self.final = nn.Conv2d(filters[0], out_ch, kernel_size=1)
 
@@ -119,15 +111,15 @@ class UNet(nn.Module):
         self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
         self.Up = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True)
 
-        self.conv0_0 = conv_block(in_ch, filters[0], filters[0], norm_method)
-        self.conv1_0 = conv_block(filters[0], filters[1], filters[1], norm_method)
-        self.conv2_0 = conv_block(filters[1], filters[2], filters[2], norm_method)
-        self.conv3_0 = conv_block(filters[2], filters[3], filters[3], norm_method)
-        self.conv4_0 = conv_block(filters[3], filters[4], filters[4], norm_method)
-        self.conv3_1 = conv_block(filters[3] + filters[4], filters[3], filters[3], norm_method)
-        self.conv2_2 = conv_block(filters[2] + filters[3], filters[2], filters[2], norm_method)
-        self.conv1_3 = conv_block(filters[1] + filters[2], filters[1], filters[1], norm_method)
-        self.conv0_4 = conv_block(filters[0] + filters[1], filters[0], filters[0], norm_method)
+        self.conv0_0 = conv_block_nested(in_ch, filters[0], filters[0], norm_method)
+        self.conv1_0 = conv_block_nested(filters[0], filters[1], filters[1], norm_method)
+        self.conv2_0 = conv_block_nested(filters[1], filters[2], filters[2], norm_method)
+        self.conv3_0 = conv_block_nested(filters[2], filters[3], filters[3], norm_method)
+        self.conv4_0 = conv_block_nested(filters[3], filters[4], filters[4], norm_method)
+        self.conv3_1 = conv_block_nested(filters[3] + filters[4], filters[3], filters[3], norm_method)
+        self.conv2_2 = conv_block_nested(filters[2]*2 + filters[3], filters[2], filters[2], norm_method)
+        self.conv1_3 = conv_block_nested(filters[1]*3 + filters[2], filters[1], filters[1], norm_method)
+        self.conv0_4 = conv_block_nested(filters[0]*4 + filters[1], filters[0], filters[0], norm_method)
         self.final = nn.Conv2d(filters[0], out_ch, kernel_size=1)
 
     def forward(self, x):
