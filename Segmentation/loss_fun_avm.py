@@ -1,14 +1,7 @@
-from typing import Optional
-
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
 from kornia.utils.one_hot import one_hot
-
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
 import numpy as np
 
 

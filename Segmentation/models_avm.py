@@ -1,12 +1,5 @@
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
-from torch import optim
-import torch.utils.data as Data
-import matplotlib.pyplot as plt
-import torchvision.transforms as T
-
-
 
 class conv_block(nn.Module):
     
@@ -46,10 +39,7 @@ class conv_block(nn.Module):
     
 #Nested Unet
 class NestedUNet(nn.Module):
-    """
-    Implementation of this paper:
-    https://arxiv.org/pdf/1807.10165.pdf
-    """
+
     def __init__(self, in_ch=1, out_ch=2, norm_method='batch'):
         super(NestedUNet, self).__init__()
 
